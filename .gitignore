@@ -1,0 +1,89 @@
+# Env
+.env
+.env.local
+.env.*.local
+*.pem
+ref
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+
+# Testing / coverage
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+htmlcov/
+
+# mypy / ruff
+.mypy_cache/
+.ruff_cache/
+.pyre/
+
+# Node / TS
+node_modules/
+.pnpm-store/
+dist/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker / data
+/data/
+postgres-data/
+redis-data/
+*.log
+logs/
+
+# Secrets
+*.pem
+*.key
+secrets/
+.secrets/
+
+# Build artifacts
+*.tar.gz
+*.zip
+*.whl
+
+# Internal reference material — not for public repo
+ref/
+CLAUDE.md
