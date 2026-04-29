@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0b1118;
+  --fg: #e5e7eb;
+  --muted: #9ca3af;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Inter',
+    'Segoe UI',
+    sans-serif;
+}
+
+a {
+  color: #38bdf8;
+}
+
+a:hover {
+  text-decoration: underline;
+}
