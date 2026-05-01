@@ -1,0 +1,32 @@
+# NGINX ingress example. Replace hosts and enable cert-manager annotations
+# before applying in production.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: goderash
+  namespace: goderash
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.goderash.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: goderash-core
+                port:
+                  number: 80
+    - host: app.goderash.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: goderash-dashboard
+                port:
+                  number: 80
