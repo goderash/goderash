@@ -1,0 +1,64 @@
+# Single-replica Redis for dev / PoC clusters only.
+# Production: use a managed cache and remove this file from the kustomization.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: goderash-redis-data
+  namespace: goderash
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goderash-redis
+  namespace: goderash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goderash-redis
+  template:
+    metadata:
+      labels:
+        app: goderash-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - name: redis
+              containerPort: 6379
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: goderash-redis-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: goderash-redis
+  namespace: goderash
+spec:
+  selector:
+    app: goderash-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
