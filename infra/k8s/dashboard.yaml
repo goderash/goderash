@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: goderash-dashboard
+  namespace: goderash
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: goderash-dashboard
+  template:
+    metadata:
+      labels:
+        app: goderash-dashboard
+    spec:
+      containers:
+        - name: dashboard
+          image: ghcr.io/goderash/goderash-dashboard:latest
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: GODERASH_ENDPOINT
+              value: "http://goderash-core"
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: goderash-dashboard
+  namespace: goderash
+spec:
+  selector:
+    app: goderash-dashboard
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
