@@ -1,0 +1,48 @@
+[project]
+name = "goderash-workspace"
+version = "0.1.0"
+description = "Goderash — audit & governance fabric for regulated AI agents (workspace root)"
+requires-python = ">=3.10"
+
+[tool.uv.workspace]
+members = [
+  "python/core",
+  "python/goderash_sdk",
+  "python/goderash_adapter_langgraph",
+  "python/goderash_adapter_openai",
+  "python/goderash_adapter_anthropic",
+]
+
+[tool.uv.sources]
+goderash-sdk = { workspace = true }
+goderash-core = { workspace = true }
+goderash-adapter-langgraph = { workspace = true }
+goderash-adapter-openai = { workspace = true }
+goderash-adapter-anthropic = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "B", "UP", "C4", "SIM", "RUF"]
+ignore = ["E501"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unused_ignores = true
+warn_return_any = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers --cov-report=term-missing"
+testpaths = ["tests"]
