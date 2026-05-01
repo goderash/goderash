@@ -1,0 +1,33 @@
+{
+  "name": "@goderash/adapter-langgraph",
+  "version": "0.1.0",
+  "description": "LangGraph.js callback handler that emits Goderash audit events",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "src", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "biome lint src || true"
+  },
+  "dependencies": {
+    "@goderash/sdk": "workspace:*"
+  },
+  "peerDependencies": {
+    "@langchain/core": "^0.3.0"
+  },
+  "devDependencies": {
+    "@langchain/core": "^0.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
