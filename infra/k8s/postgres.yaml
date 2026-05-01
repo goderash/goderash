@@ -1,0 +1,76 @@
+# Single-replica Postgres for dev / PoC clusters only.
+# Production: use a managed database and remove this file from the kustomization.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: goderash-postgres-data
+  namespace: goderash
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: goderash-postgres
+  namespace: goderash
+spec:
+  serviceName: goderash-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: goderash-postgres
+  template:
+    metadata:
+      labels:
+        app: goderash-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - name: pg
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: goderash
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: goderash-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: goderash
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "goderash"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "goderash"]
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: goderash-postgres-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: goderash-postgres
+  namespace: goderash
+spec:
+  selector:
+    app: goderash-postgres
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: 5432
+  clusterIP: None
