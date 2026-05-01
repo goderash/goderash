@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: goderash
+
+# secret.yaml is intentionally NOT listed — keep it out of source control.
+# Apply it once out-of-band: `kubectl apply -f infra/k8s/secret.yaml`
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - postgres.yaml
+  - redis.yaml
+  - migrations.yaml
+  - core.yaml
+  - dashboard.yaml
+  - ingress.yaml
