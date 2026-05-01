@@ -1,0 +1,26 @@
+name   = "goderash-prod"
+region = "us-east-1"
+
+# Tighten before going live.
+alb_ingress_cidrs = ["0.0.0.0/0"]
+
+# Bump for production.
+db_instance_class       = "db.t4g.small"
+db_allocated_storage_gb = 20
+db_multi_az             = false
+
+redis_node_type = "cache.t4g.micro"
+redis_num_nodes = 1
+
+# Override these once you've pushed images to ECR.
+core_image      = ""
+dashboard_image = ""
+
+core_desired_count      = 2
+dashboard_desired_count = 2
+
+tags = {
+  Project   = "goderash"
+  ManagedBy = "terraform"
+  Env       = "prod"
+}
