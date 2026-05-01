@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: goderash-config
+  namespace: goderash
+data:
+  GODERASH_ENV: "prod"
+  GODERASH_LOG_LEVEL: "INFO"
+  GODERASH_API_HOST: "0.0.0.0"
+  GODERASH_API_PORT: "8000"
+  API_KEY_PREFIX: "gdr_"
