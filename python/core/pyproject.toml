@@ -1,0 +1,75 @@
+[project]
+name = "goderash-core"
+version = "0.1.0"
+description = "Goderash control plane — event-sourced audit ledger for regulated AI agents"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Goderash", email = "eng@goderash.com" }]
+readme = "README.md"
+keywords = ["ai", "agents", "audit", "compliance", "fastapi", "soc2", "hipaa", "governance"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Framework :: FastAPI",
+  "Topic :: Security",
+]
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "pydantic>=2.9.0",
+  "pydantic-settings>=2.5.0",
+  "sqlalchemy[asyncio]>=2.0.35",
+  "asyncpg>=0.29.0",
+  "alembic>=1.13.3",
+  "redis>=5.1.0",
+  "httpx>=0.27.0",
+  "structlog>=24.4.0",
+  "tenacity>=9.0.0",
+  "cryptography>=43.0.0",
+  "pyjwt>=2.9.0",
+  "slowapi>=0.1.9",
+  "orjson>=3.10.7",
+  "prometheus-client>=0.21.0",
+  "python-multipart>=0.0.12",
+]
+
+[project.urls]
+Homepage    = "https://goderash.com"
+Repository  = "https://github.com/goderash/goderash"
+Issues      = "https://github.com/goderash/goderash/issues"
+Changelog   = "https://github.com/goderash/goderash/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.3",
+  "pytest-asyncio>=0.24.0",
+  "pytest-cov>=5.0.0",
+  "httpx>=0.27.0",
+  "ruff>=0.6.9",
+  "black>=24.10.0",
+  "isort>=5.13.2",
+  "mypy>=1.11.2",
+  "bandit>=1.7.10",
+  "types-redis>=4.6.0",
+]
+
+[project.scripts]
+goderash-core = "goderash_core.main:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/goderash_core"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "-ra --strict-markers --cov=goderash_core --cov-report=term-missing --cov-fail-under=80"
+testpaths = ["tests"]
+pythonpath = ["src"]
