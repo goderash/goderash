@@ -1,0 +1,33 @@
+{
+  "name": "@goderash/adapter-openai-assistants",
+  "version": "0.1.0",
+  "description": "Audit handler for the OpenAI Node SDK and Assistants API",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "src", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "biome lint src || true"
+  },
+  "dependencies": {
+    "@goderash/sdk": "workspace:*"
+  },
+  "peerDependencies": {
+    "openai": ">=4.50.0"
+  },
+  "devDependencies": {
+    "openai": "^4.50.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
