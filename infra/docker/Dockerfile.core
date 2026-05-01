@@ -1,0 +1,51 @@
+# syntax=docker/dockerfile:1.7
+
+# -------- builder --------
+FROM python:3.12-slim-bookworm AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      build-essential curl git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY python/core/pyproject.toml /build/pyproject.toml
+COPY python/core/src /build/src
+
+RUN pip install --upgrade pip && \
+    pip install --prefix=/install .
+
+# -------- runtime --------
+FROM python:3.12-slim-bookworm AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/install/bin:${PATH}" \
+    PYTHONPATH="/install/lib/python3.12/site-packages:/app/src"
+
+RUN groupadd --gid 1001 goderash && \
+    useradd --uid 1001 --gid 1001 --shell /bin/bash --create-home goderash && \
+    apt-get update && apt-get install -y --no-install-recommends \
+      curl ca-certificates libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=builder /install /install
+COPY python/core/src /app/src
+COPY python/core/alembic.ini /app/alembic.ini
+COPY python/core/src/goderash_core/migrations /app/src/goderash_core/migrations
+
+RUN mkdir -p /app/data/packs && chown -R goderash:goderash /app
+
+USER goderash
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -fsS http://127.0.0.1:8000/health || exit 1
+
+CMD ["uvicorn", "goderash_core.main:app", "--host", "0.0.0.0", "--port", "8000"]
