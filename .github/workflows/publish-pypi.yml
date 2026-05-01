@@ -1,0 +1,97 @@
+name: publish-pypi
+
+on:
+  push:
+    tags:
+      - "v*.*.*"          # v0.1.0, v1.2.3, …
+
+permissions:
+  contents: read
+  id-token: write         # OIDC Trusted Publishing — no stored token needed
+
+jobs:
+  build-sdk:
+    name: Build goderash-sdk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build wheel + sdist
+        run: |
+          cd python/goderash_sdk
+          uv build --out-dir dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-sdk
+          path: python/goderash_sdk/dist/
+
+  build-core:
+    name: Build goderash-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build wheel + sdist
+        run: |
+          cd python/core
+          uv build --out-dir dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-core
+          path: python/core/dist/
+
+  publish-sdk:
+    name: Publish goderash-sdk → PyPI
+    needs: build-sdk
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/goderash-sdk
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist-sdk
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+
+  publish-core:
+    name: Publish goderash-core → PyPI
+    needs: build-core
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/goderash-core
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist-core
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
