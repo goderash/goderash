@@ -1,0 +1,25 @@
+# Runs `alembic upgrade head` against the configured DATABASE_URL.
+# Re-create this Job (kubectl delete + apply) on each release that ships a new migration.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: goderash-migrations
+  namespace: goderash
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app: goderash-migrations
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: ghcr.io/goderash/goderash-core:latest
+          command: ["alembic", "upgrade", "head"]
+          envFrom:
+            - configMapRef:
+                name: goderash-config
+            - secretRef:
+                name: goderash-secrets
