@@ -1,7 +1,7 @@
 {
   "name": "@goderash/adapter-openai-assistants",
-  "version": "0.1.0",
-  "description": "Audit handler for the OpenAI Node SDK and Assistants API",
+  "version": "0.1.1",
+  "description": "Audit handler for the OpenAI Node SDK and Assistants API — tamper-evident, hash-chained, regulator-ready.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -13,6 +13,36 @@
     }
   },
   "files": ["dist", "src", "README.md"],
+  "keywords": [
+    "ai",
+    "ai-agent",
+    "openai",
+    "assistants",
+    "assistants-api",
+    "audit",
+    "compliance",
+    "governance",
+    "soc2",
+    "hipaa",
+    "ledger",
+    "observability",
+    "llm",
+    "llmops",
+    "tool-calling",
+    "goderash"
+  ],
+  "homepage": "https://ai.goderash.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goderash/goderash.git",
+    "directory": "packages/adapter-openai-assistants"
+  },
+  "bugs": {
+    "url": "https://github.com/goderash/goderash/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
