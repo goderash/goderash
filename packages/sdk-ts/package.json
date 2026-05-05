@@ -1,7 +1,7 @@
 {
   "name": "@goderash/sdk",
-  "version": "0.1.0",
-  "description": "Goderash SDK — audit any AI agent with one import",
+  "version": "0.1.1",
+  "description": "Goderash SDK — audit any AI agent with one import. Tamper-evident, hash-chained, regulator-ready.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -14,6 +14,41 @@
     }
   },
   "files": ["dist", "src", "README.md"],
+  "keywords": [
+    "ai",
+    "ai-agent",
+    "agents",
+    "audit",
+    "compliance",
+    "governance",
+    "soc2",
+    "hipaa",
+    "ffiec",
+    "finra",
+    "ledger",
+    "observability",
+    "llm",
+    "llmops",
+    "mlops",
+    "tool-calling",
+    "agent-framework",
+    "anthropic",
+    "openai",
+    "langchain",
+    "langgraph"
+  ],
+  "homepage": "https://ai.goderash.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goderash/goderash.git",
+    "directory": "packages/sdk-ts"
+  },
+  "bugs": {
+    "url": "https://github.com/goderash/goderash/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
