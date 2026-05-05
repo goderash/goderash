@@ -8,8 +8,55 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- Stateless `_post_async` retries are still TODO; current SDK transport
-  surfaces transport errors directly to the caller.
+- **Self-serve identity layer** — Sprint 1 of the productization push.
+  - `users` and `memberships` tables (Alembic `0002_users_and_memberships`).
+  - Argon2id password hashing (`security.passwords`) and HS256 session JWTs
+    with `access` / `refresh` token kinds (`security.tokens`).
+  - `POST /v1/auth/signup` — atomically creates the user, a tenant, an
+    `owner` membership, and the first API key; returns the raw key + a
+    fresh access/refresh pair.
+  - `POST /v1/auth/login` — email + password → access/refresh pair; runs a
+    decoy verify on missing-user paths so timing doesn't leak existence.
+  - `POST /v1/auth/refresh` — trades a refresh token for a fresh pair.
+  - `POST /v1/auth/logout` — stateless (client discards tokens).
+  - `GET  /v1/auth/me` — returns the current user + all tenant memberships.
+  - `GET    /v1/orgs/{tenant_id}/keys`, `POST` to issue, `DELETE` to revoke
+    — session-authenticated, scoped to the membership of the acting user;
+    returns 404 (not 403) on cross-tenant access to avoid existence leaks.
+  - 12 new unit tests; full suite stays green at 51/51.
+
+- **Billing, usage metering, and webhooks** — Sprint 2.
+  - Alembic `0003_billing_and_webhooks` adds `plan`, `monthly_event_quota`,
+    `stripe_customer_id`, `stripe_subscription_id` to `tenants`, and creates
+    the `webhook_endpoints` table.
+  - Hobby plan hard quota (10k events/month) enforced at ingest with a `402`
+    and upgrade prompt; paid plans record overages for Stripe metered billing.
+  - Redis-backed usage counter (`goderash:usage:{tenant}:{YYYY-MM}`, 40-day TTL)
+    with DB fallback for billing disputes.
+  - Stripe integration (`billing/service.py`): `create_stripe_customer`,
+    `create_stripe_subscription`, `report_stripe_usage` — all async via
+    `asyncio.to_thread`, fire-and-optional, never fail the main request.
+  - `GET /v1/billing/usage` returns current-period events, quota, and overage.
+  - `POST /v1/billing/stripe-webhook` handles `subscription.updated` /
+    `subscription.deleted` events; signature verified with `stripe.WebhookEndpoint`.
+  - Outbound webhooks (`webhooks/dispatcher.py`): HMAC-SHA256 signed payloads
+    (`X-Goderash-Signature: sha256=<hex>`), `asyncio.create_task` fire-and-forget,
+    exponential-backoff retries on 5xx, `last_status` written in a fresh session.
+  - `chain.broken` webhook fired from `POST /v1/verify` when integrity fails.
+  - `quota.warning` webhook fired at 80% quota during ingest.
+  - `GET/POST/DELETE /v1/orgs/{tenant_id}/webhooks` — manage webhook endpoints
+    (Startup+ only, 402 on Hobby); `hmac_secret` returned once at creation.
+  - 22 new unit tests (quota logic, HMAC signing, `subscribes_to`); all 73 pass.
+
+- **SDK transport retries** — Sprint 1 / Task 2.
+  - Both `GoderashClient._post` (sync) and `_post_async` (async) now retry up to
+    3 times on retryable failures (429, 5xx, network/transport errors).
+  - Full-jitter exponential backoff: `sleep = uniform(0, min(0.5 × 2ⁿ, 10s))`.
+  - Batch payload is serialized once before the loop; server-side `event_id` dedup
+    makes all retries safe to re-send.
+  - Non-retryable 4xx errors (except 429) propagate immediately without retrying.
+  - `time.sleep` in the sync path; `asyncio.sleep` in the async path.
+  - 10 new unit tests (`test_client_retry.py`) + 6 new TypeScript tests; all green.
 
 ## [0.1.0] — 2026-04-27
 
