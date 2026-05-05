@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Route } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Audit & governance fabric for regulated AI agents',
 }
 
-const NAV: { href: string; label: string }[] = [
+const NAV: { href: Route; label: string }[] = [
   { href: '/', label: 'Overview' },
   { href: '/events', label: 'Events' },
   { href: '/verify', label: 'Verify' },
