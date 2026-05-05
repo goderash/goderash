@@ -18,11 +18,13 @@ import secrets
 from datetime import datetime
 from typing import Any
 
+import redis.asyncio as aioredis
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..billing.usage import get_usage, increment_usage, is_quota_exceeded, quota_warning_threshold
 from ..config import get_settings
 from ..db import session_scope
 from ..events.types import GoderashEventEnvelope
@@ -30,9 +32,23 @@ from ..ledger.chain import verify_chain
 from ..ledger.store import EventLedger
 from ..models.event import EventRow
 from ..models.tenant import ApiKey, Tenant
+from ..webhooks.dispatcher import EVENT_CHAIN_BROKEN, EVENT_QUOTA_WARNING, dispatch
 from .auth import AuthContext, _hash_key, require_admin, require_api_key
 
 router = APIRouter()
+
+
+# ---- Dependencies -----------------------------------------------------------
+
+
+async def _redis() -> aioredis.Redis | None:
+    settings = get_settings()
+    try:
+        r = aioredis.from_url(settings.redis_url, decode_responses=True)
+        await r.ping()
+        return r
+    except Exception:
+        return None
 
 
 # ---- Schemas ----------------------------------------------------------------
@@ -112,6 +128,34 @@ async def _session() -> AsyncSession:
         yield s
 
 
+async def _check_ingest_rate(
+    redis: aioredis.Redis | None,
+    tenant_id: str,
+    batch_size: int,
+    limit_per_minute: int,
+) -> None:
+    """Sliding per-tenant rate limit using a Redis counter keyed by minute."""
+    if redis is None:
+        return  # Redis unavailable — degrade gracefully
+    from datetime import datetime, timezone
+
+    minute_key = datetime.now(tz=timezone.utc).strftime("%Y%m%d%H%M")
+    key = f"gdr:rate:ingest:{tenant_id}:{minute_key}"
+    try:
+        current = await redis.incrby(key, batch_size)
+        if current == batch_size:
+            await redis.expire(key, 90)  # 90s TTL: covers the full minute + buffer
+        if current > limit_per_minute:
+            raise HTTPException(
+                status.HTTP_429_TOO_MANY_REQUESTS,
+                f"ingest rate limit of {limit_per_minute:,} events/min exceeded for this tenant",
+            )
+    except HTTPException:
+        raise
+    except Exception:
+        pass  # Redis blip — never fail ingestion
+
+
 @router.post(
     "/v1/events",
     status_code=status.HTTP_202_ACCEPTED,
@@ -121,11 +165,15 @@ async def ingest_events(
     body: IngestRequest = Body(...),
     auth: AuthContext = Depends(require_api_key),
     session: AsyncSession = Depends(_session),
+    redis: aioredis.Redis | None = Depends(_redis),
 ) -> IngestResponse:
     settings = get_settings()
 
     if len(body.events) > settings.max_event_batch_size:
         raise HTTPException(status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "batch too large")
+
+    # Per-tenant rate limit
+    await _check_ingest_rate(redis, auth.tenant_id, len(body.events), settings.ingest_rate_limit_per_minute)
 
     # Tenant isolation: every envelope must match the authed tenant.
     for env in body.events:
@@ -135,8 +183,34 @@ async def ingest_events(
                 f"envelope tenant_id {env.tenant_id!r} != authed tenant {auth.tenant_id!r}",
             )
 
+    # Quota enforcement: Hobby plan hard limit.
+    tenant_row = (await session.execute(select(Tenant).where(Tenant.id == auth.tenant_id))).scalar_one_or_none()
+    if tenant_row is not None:
+        current_usage = await get_usage(auth.tenant_id, redis=redis, session=session)
+        quota = tenant_row.monthly_event_quota
+
+        if is_quota_exceeded(current_usage, quota):
+            raise HTTPException(
+                status.HTTP_402_PAYMENT_REQUIRED,
+                f"Monthly event quota of {quota:,} reached. "
+                "Upgrade your plan at goderash.com/pricing.",
+            )
+
+        # Fire quota.warning webhook at 80% — best-effort, don't block ingest.
+        warn = quota_warning_threshold(quota)
+        if warn > 0 and current_usage < warn <= current_usage + len(body.events):
+            await dispatch(session, auth.tenant_id, EVENT_QUOTA_WARNING, {
+                "quota": quota,
+                "used": current_usage,
+                "threshold_pct": 80,
+            })
+
     ledger = EventLedger(session)
     stored = await ledger.append_many(auth.tenant_id, body.events)
+
+    # Increment Redis usage counter (best-effort — never fail the request).
+    if redis is not None:
+        await increment_usage(redis, auth.tenant_id, len(stored))
 
     return IngestResponse(
         accepted=len(stored),
@@ -197,6 +271,13 @@ async def verify(
             for r in rows
         ]
     )
+    # Fire chain.broken webhook asynchronously — never block the verify response.
+    if not ok:
+        await dispatch(session, auth.tenant_id, EVENT_CHAIN_BROKEN, {
+            "ok": False,
+            "checked": len(rows),
+            "first_broken_index": broken,
+        })
     return VerifyResponse(ok=ok, checked=len(rows), first_broken_index=broken)
 
 
