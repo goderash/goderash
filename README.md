@@ -1,22 +1,52 @@
 # Goderash
 
-**Audit & Governance Fabric for Regulated AI Agents.**
+> **Audit & governance fabric for regulated AI agents.** Tamper-evident, hash-chained, regulator-ready.
 
-Stripe for agentic compliance. Wrap any agent framework (LangGraph, OpenAI
-Assistants, Anthropic Messages, LangChain, AutoGen) with one SDK and get:
+[![license](https://img.shields.io/github/license/goderash/goderash.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![npm](https://img.shields.io/npm/v/@goderash/sdk.svg?label=%40goderash%2Fsdk)](https://www.npmjs.com/package/@goderash/sdk)
+[![pypi](https://img.shields.io/pypi/v/goderash-sdk.svg?label=goderash-sdk)](https://pypi.org/project/goderash-sdk/)
+[![ai.goderash.com](https://img.shields.io/badge/live-ai.goderash.com-0a7?logo=vercel&logoColor=white)](https://ai.goderash.com)
 
-- **Event-sourced audit ledger** — append-only, SHA-256 hash-chained,
-  tamper-evident, multi-tenant.
+🌐 **Live demo:** [ai.goderash.com](https://ai.goderash.com) &nbsp;·&nbsp; 📦 **GitHub:** [goderash/goderash](https://github.com/goderash/goderash)
+
+Wrap any agent framework (LangGraph, OpenAI Assistants, Anthropic Messages, LangChain, AutoGen) with one SDK and get:
+
+- **Event-sourced audit ledger** — append-only, SHA-256 hash-chained, tamper-evident, multi-tenant.
 - **Upcasting registry** — evolve event schemas without rewriting history.
-- **Data-contract enforcement** — type / range / regex / monotonic checks
-  with blame-chain attribution.
-- **What-If projector** — replay history under alternate velocity caps,
-  deny lists, or permission modes; deterministic counterfactual diffs.
-- **Compliance packs** — one-click signed evidence ZIPs for SOC 2, HIPAA,
-  FFIEC, FINRA, SEC Rule 17a-4.
-- **Runtime safety stack** — fraud guard, velocity limits, permission
-  modes, conversation budgets, cancellation tokens (lifted from Dashen
-  AIR's banking-grade composition root).
+- **Data-contract enforcement** — type / range / regex / monotonic checks with blame-chain attribution.
+- **What-If projector** — replay history under alternate velocity caps, deny lists, or permission modes; deterministic counterfactual diffs.
+- **Compliance packs** — one-click signed evidence ZIPs for SOC 2, HIPAA, FFIEC, FINRA, SEC Rule 17a-4.
+- **Runtime safety stack** — fraud guard, velocity limits, permission modes, conversation budgets, cancellation tokens (battle-tested in a banking-grade AI agent in production).
+
+## Packages
+
+### TypeScript (npm)
+
+| Package | Version | Weekly Downloads | Description |
+|---|---|---|---|
+| [`@goderash/sdk`](https://www.npmjs.com/package/@goderash/sdk) | [![npm](https://img.shields.io/npm/v/@goderash/sdk.svg)](https://www.npmjs.com/package/@goderash/sdk) | [![dl](https://img.shields.io/npm/dw/@goderash/sdk.svg)](https://www.npmjs.com/package/@goderash/sdk) | Core SDK + runtime guards |
+| [`@goderash/adapter-claude-sdk`](https://www.npmjs.com/package/@goderash/adapter-claude-sdk) | [![npm](https://img.shields.io/npm/v/@goderash/adapter-claude-sdk.svg)](https://www.npmjs.com/package/@goderash/adapter-claude-sdk) | [![dl](https://img.shields.io/npm/dw/@goderash/adapter-claude-sdk.svg)](https://www.npmjs.com/package/@goderash/adapter-claude-sdk) | Anthropic Messages / Claude SDK |
+| [`@goderash/adapter-openai-assistants`](https://www.npmjs.com/package/@goderash/adapter-openai-assistants) | [![npm](https://img.shields.io/npm/v/@goderash/adapter-openai-assistants.svg)](https://www.npmjs.com/package/@goderash/adapter-openai-assistants) | [![dl](https://img.shields.io/npm/dw/@goderash/adapter-openai-assistants.svg)](https://www.npmjs.com/package/@goderash/adapter-openai-assistants) | OpenAI Assistants API |
+| [`@goderash/adapter-langgraph`](https://www.npmjs.com/package/@goderash/adapter-langgraph) | [![npm](https://img.shields.io/npm/v/@goderash/adapter-langgraph.svg)](https://www.npmjs.com/package/@goderash/adapter-langgraph) | [![dl](https://img.shields.io/npm/dw/@goderash/adapter-langgraph.svg)](https://www.npmjs.com/package/@goderash/adapter-langgraph) | LangGraph.js / LangChain.js |
+
+### Python (PyPI)
+
+| Package | Version | Monthly Downloads | Description |
+|---|---|---|---|
+| [`goderash-sdk`](https://pypi.org/project/goderash-sdk/) | [![pypi](https://img.shields.io/pypi/v/goderash-sdk.svg)](https://pypi.org/project/goderash-sdk/) | [![dl](https://img.shields.io/pypi/dm/goderash-sdk.svg)](https://pypi.org/project/goderash-sdk/) | Core SDK + runtime guards |
+| [`goderash-adapter-anthropic`](https://pypi.org/project/goderash-adapter-anthropic/) | [![pypi](https://img.shields.io/pypi/v/goderash-adapter-anthropic.svg)](https://pypi.org/project/goderash-adapter-anthropic/) | [![dl](https://img.shields.io/pypi/dm/goderash-adapter-anthropic.svg)](https://pypi.org/project/goderash-adapter-anthropic/) | Anthropic Messages + tool use |
+| [`goderash-adapter-openai`](https://pypi.org/project/goderash-adapter-openai/) | [![pypi](https://img.shields.io/pypi/v/goderash-adapter-openai.svg)](https://pypi.org/project/goderash-adapter-openai/) | [![dl](https://img.shields.io/pypi/dm/goderash-adapter-openai.svg)](https://pypi.org/project/goderash-adapter-openai/) | OpenAI Chat / Responses / Assistants |
+| [`goderash-adapter-langgraph`](https://pypi.org/project/goderash-adapter-langgraph/) | [![pypi](https://img.shields.io/pypi/v/goderash-adapter-langgraph.svg)](https://pypi.org/project/goderash-adapter-langgraph/) | [![dl](https://img.shields.io/pypi/dm/goderash-adapter-langgraph.svg)](https://pypi.org/project/goderash-adapter-langgraph/) | LangGraph / LangChain callback |
+
+## Install
+
+```bash
+# Python
+pip install goderash-sdk
+
+# TypeScript / JavaScript
+npm i @goderash/sdk
+```
 
 ## Try it in 60 seconds
 
