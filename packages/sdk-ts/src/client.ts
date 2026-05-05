@@ -22,6 +22,11 @@ export interface GoderashClientOptions {
   fetchImpl?: typeof fetch
 }
 
+const RETRY_MAX = 3
+const RETRY_BASE_MS = 500
+const RETRY_CAP_MS = 10_000
+const RETRYABLE_STATUSES = new Set([429, 500, 502, 503, 504])
+
 export class GoderashClient {
   private readonly apiKey: string
   private readonly tenant: string
@@ -82,27 +87,63 @@ export class GoderashClient {
     const batch = this.buffer
     this.buffer = []
 
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), this.timeoutMs)
+    // Serialize once; same bytes on every retry (idempotent — server dedupes by event_id).
+    const body = JSON.stringify({ events: batch })
+    let lastError: Error | undefined
 
-    try {
-      const res = await this.fetchImpl(`${this.endpoint}/v1/events`, {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          'content-type': 'application/json',
-          'x-goderash-api-key': this.apiKey,
-          'x-goderash-tenant': this.tenant,
-        },
-        body: JSON.stringify({ events: batch }),
-      })
-      if (!res.ok) {
-        const body = await res.text().catch(() => '')
-        throw new Error(`goderash ingest ${res.status}: ${body.slice(0, 300)}`)
+    for (let attempt = 0; attempt <= RETRY_MAX; attempt++) {
+      if (attempt > 0) {
+        await this._sleep(this._jitterDelay(attempt - 1))
       }
-    } finally {
-      clearTimeout(timer)
+
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), this.timeoutMs)
+
+      let res: Response | undefined
+      let fetchError: Error | undefined
+
+      try {
+        res = await this.fetchImpl(`${this.endpoint}/v1/events`, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: {
+            'content-type': 'application/json',
+            'x-goderash-api-key': this.apiKey,
+            'x-goderash-tenant': this.tenant,
+          },
+          body,
+        })
+      } catch (err) {
+        fetchError = err instanceof Error ? err : new Error(String(err))
+      } finally {
+        clearTimeout(timer)
+      }
+
+      if (fetchError) {
+        lastError = fetchError
+        continue
+      }
+
+      if (res!.ok) return
+
+      const text = await res!.text().catch(() => '')
+      const err = new Error(`goderash ingest ${res!.status}: ${text.slice(0, 300)}`)
+
+      if (!RETRYABLE_STATUSES.has(res!.status)) throw err
+
+      lastError = err
     }
+
+    throw lastError ?? new Error('goderash: flush failed after retries')
+  }
+
+  private _jitterDelay(attempt: number): number {
+    const ceiling = Math.min(RETRY_BASE_MS * Math.pow(2, attempt), RETRY_CAP_MS)
+    return Math.random() * ceiling
+  }
+
+  private _sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   /** For tests: expose the current buffer without mutating it. */
