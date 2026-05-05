@@ -1,7 +1,7 @@
 {
   "name": "@goderash/adapter-langgraph",
-  "version": "0.1.0",
-  "description": "LangGraph.js callback handler that emits Goderash audit events",
+  "version": "0.1.1",
+  "description": "LangGraph.js / LangChain.js callback handler that emits Goderash audit events — tamper-evident, hash-chained, regulator-ready.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -13,6 +13,36 @@
     }
   },
   "files": ["dist", "src", "README.md"],
+  "keywords": [
+    "ai",
+    "ai-agent",
+    "langchain",
+    "langgraph",
+    "langchainjs",
+    "audit",
+    "compliance",
+    "governance",
+    "soc2",
+    "hipaa",
+    "callback",
+    "ledger",
+    "observability",
+    "llm",
+    "llmops",
+    "goderash"
+  ],
+  "homepage": "https://ai.goderash.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goderash/goderash.git",
+    "directory": "packages/adapter-langgraph"
+  },
+  "bugs": {
+    "url": "https://github.com/goderash/goderash/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
