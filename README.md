@@ -5,7 +5,6 @@
 [![license](https://img.shields.io/github/license/goderash/goderash.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![npm](https://img.shields.io/npm/v/@goderash/sdk.svg?label=%40goderash%2Fsdk)](https://www.npmjs.com/package/@goderash/sdk)
 [![pypi](https://img.shields.io/pypi/v/goderash-sdk.svg?label=goderash-sdk)](https://pypi.org/project/goderash-sdk/)
-[![ai.goderash.com](https://img.shields.io/badge/live-ai.goderash.com-0a7?logo=vercel&logoColor=white)](https://ai.goderash.com)
 
 📦 **GitHub:** [goderash/goderash](https://github.com/goderash/goderash)
 
