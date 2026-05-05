@@ -11,7 +11,13 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from goderash_core.config import get_settings
 from goderash_core.db import Base
-from goderash_core.models import ApiKey, EventRow, Tenant  # noqa: F401  (register metadata)
+from goderash_core.models import (  # noqa: F401  (register metadata)
+    ApiKey,
+    EventRow,
+    Membership,
+    Tenant,
+    User,
+)
 
 config = context.config
 if config.config_file_name is not None:
