@@ -1,14 +1,50 @@
 [project]
 name = "goderash-adapter-anthropic"
-version = "0.1.0"
-description = "Goderash adapter for the Anthropic Python SDK (Messages + tool use)"
+version = "0.1.1"
+description = "Goderash adapter for the Anthropic Python SDK (Messages + tool use) — tamper-evident, hash-chained, regulator-ready."
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
+authors = [{ name = "Goderash", email = "eng@goderash.com" }]
+readme = "README.md"
+keywords = [
+  "ai",
+  "ai-agent",
+  "anthropic",
+  "claude",
+  "audit",
+  "compliance",
+  "governance",
+  "soc2",
+  "hipaa",
+  "ledger",
+  "observability",
+  "llm",
+  "llmops",
+  "tool-calling",
+  "goderash",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Security",
+]
 
 dependencies = [
   "goderash-sdk>=0.1.0",
   "anthropic>=0.40.0",
 ]
+
+[project.urls]
+Homepage      = "https://ai.goderash.com"
+Documentation = "https://github.com/goderash/goderash#readme"
+Repository    = "https://github.com/goderash/goderash"
+Issues        = "https://github.com/goderash/goderash/issues"
 
 [project.optional-dependencies]
 dev = [
