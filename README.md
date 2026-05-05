@@ -7,7 +7,7 @@
 [![pypi](https://img.shields.io/pypi/v/goderash-sdk.svg?label=goderash-sdk)](https://pypi.org/project/goderash-sdk/)
 [![ai.goderash.com](https://img.shields.io/badge/live-ai.goderash.com-0a7?logo=vercel&logoColor=white)](https://ai.goderash.com)
 
-🌐 **Live demo:** [ai.goderash.com](https://ai.goderash.com) &nbsp;·&nbsp; 📦 **GitHub:** [goderash/goderash](https://github.com/goderash/goderash)
+📦 **GitHub:** [goderash/goderash](https://github.com/goderash/goderash)
 
 Wrap any agent framework (LangGraph, OpenAI Assistants, Anthropic Messages, LangChain, AutoGen) with one SDK and get:
 
