@@ -69,6 +69,31 @@ class Settings(BaseSettings):
     max_event_payload_bytes: int = Field(default=65_536, ge=1024, le=1_048_576)
     ingest_rate_limit_per_minute: int = Field(default=6000, ge=1)
 
+    # Billing (Stripe)
+    billing_enabled: bool = Field(default=False)
+    stripe_secret_key: str | None = Field(default=None)
+    stripe_webhook_secret: str | None = Field(default=None)
+    # Stripe Price IDs for each paid plan — set in production env.
+    stripe_price_startup: str | None = Field(default=None)
+    stripe_price_growth: str | None = Field(default=None)
+
+    # Webhooks
+    webhook_delivery_timeout_seconds: float = Field(default=10.0, ge=1.0, le=60.0)
+    webhook_max_retries: int = Field(default=3, ge=0, le=10)
+
+    # Email (SMTP) — optional; if smtp_host is unset, emails are logged only
+    smtp_host: str | None = Field(default=None)
+    smtp_port: int = Field(default=587, ge=1, le=65535)
+    smtp_username: str | None = Field(default=None)
+    smtp_password: str | None = Field(default=None)
+    smtp_from: str = Field(default="noreply@goderash.com")
+
+    # App base URL used in email links
+    app_base_url: str = Field(default="https://goderash.com")
+
+    # Require email verification before allowing login (default: False for easy onboarding)
+    require_email_verification: bool = Field(default=False)
+
     @field_validator("database_url")
     @classmethod
     def require_async_driver(cls, v: str) -> str:
