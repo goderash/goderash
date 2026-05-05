@@ -32,10 +32,13 @@ dependencies = [
   "tenacity>=9.0.0",
   "cryptography>=43.0.0",
   "pyjwt>=2.9.0",
+  "argon2-cffi>=23.1.0",
+  "email-validator>=2.2.0",
   "slowapi>=0.1.9",
   "orjson>=3.10.7",
   "prometheus-client>=0.21.0",
   "python-multipart>=0.0.12",
+  "stripe>=7.0.0",
 ]
 
 [project.urls]
