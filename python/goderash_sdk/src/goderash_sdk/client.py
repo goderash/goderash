@@ -13,7 +13,9 @@ from __future__ import annotations
 
 import asyncio
 import os
+import random
 import threading
+import time
 from contextlib import asynccontextmanager, contextmanager
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -28,6 +30,17 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Iterator
 
 log = structlog.get_logger()
+
+_RETRY_MAX: int = 3
+_RETRY_BASE: float = 0.5
+_RETRY_CAP: float = 10.0
+_RETRYABLE_STATUSES: frozenset[int] = frozenset({429, 500, 502, 503, 504})
+
+
+def _jitter_delay(attempt: int) -> float:
+    """Full-jitter exponential backoff. Returns seconds to sleep before the next attempt."""
+    ceiling = min(_RETRY_BASE * (2 ** attempt), _RETRY_CAP)
+    return random.uniform(0.0, ceiling)
 
 
 @dataclass
@@ -182,25 +195,69 @@ class GoderashClient:
 
     def _post(self, client: httpx.Client, batch: list[GoderashEvent]) -> None:
         payload = {"events": [e.model_dump(mode="json") for e in batch]}
-        r = client.post(
-            f"{self.endpoint}/v1/events",
-            headers=self._headers(),
-            json=payload,
-        )
-        if r.status_code >= 400:
-            log.error("goderash.ingest.failed", status=r.status_code, body=r.text[:500])
-            r.raise_for_status()
+        last_exc: Exception | None = None
+
+        for attempt in range(_RETRY_MAX + 1):
+            try:
+                r = client.post(
+                    f"{self.endpoint}/v1/events",
+                    headers=self._headers(),
+                    json=payload,
+                )
+            except (httpx.TransportError, httpx.TimeoutException) as exc:
+                last_exc = exc
+                log.warning("goderash.ingest.retrying", attempt=attempt, error=str(exc))
+            else:
+                if r.status_code < 400:
+                    return
+                log.error("goderash.ingest.failed", status=r.status_code, body=r.text[:500])
+                if r.status_code not in _RETRYABLE_STATUSES:
+                    r.raise_for_status()
+                last_exc = httpx.HTTPStatusError(
+                    f"goderash ingest {r.status_code}",
+                    request=r.request,
+                    response=r,
+                )
+                log.warning("goderash.ingest.retrying", attempt=attempt, status=r.status_code)
+
+            if attempt < _RETRY_MAX:
+                time.sleep(_jitter_delay(attempt))
+
+        assert last_exc is not None
+        raise last_exc
 
     async def _post_async(self, client: httpx.AsyncClient, batch: list[GoderashEvent]) -> None:
         payload = {"events": [e.model_dump(mode="json") for e in batch]}
-        r = await client.post(
-            f"{self.endpoint}/v1/events",
-            headers=self._headers(),
-            json=payload,
-        )
-        if r.status_code >= 400:
-            log.error("goderash.ingest.failed", status=r.status_code, body=r.text[:500])
-            r.raise_for_status()
+        last_exc: Exception | None = None
+
+        for attempt in range(_RETRY_MAX + 1):
+            try:
+                r = await client.post(
+                    f"{self.endpoint}/v1/events",
+                    headers=self._headers(),
+                    json=payload,
+                )
+            except (httpx.TransportError, httpx.TimeoutException) as exc:
+                last_exc = exc
+                log.warning("goderash.ingest.retrying", attempt=attempt, error=str(exc))
+            else:
+                if r.status_code < 400:
+                    return
+                log.error("goderash.ingest.failed", status=r.status_code, body=r.text[:500])
+                if r.status_code not in _RETRYABLE_STATUSES:
+                    r.raise_for_status()
+                last_exc = httpx.HTTPStatusError(
+                    f"goderash ingest {r.status_code}",
+                    request=r.request,
+                    response=r,
+                )
+                log.warning("goderash.ingest.retrying", attempt=attempt, status=r.status_code)
+
+            if attempt < _RETRY_MAX:
+                await asyncio.sleep(_jitter_delay(attempt))
+
+        assert last_exc is not None
+        raise last_exc
 
     async def _async_client(self) -> httpx.AsyncClient:
         if self._http is None:
