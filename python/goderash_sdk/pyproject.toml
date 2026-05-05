@@ -1,12 +1,34 @@
 [project]
 name = "goderash-sdk"
-version = "0.1.0"
-description = "Goderash SDK — audit any AI agent with one import"
+version = "0.1.1"
+description = "Goderash SDK — audit any AI agent with one import. Tamper-evident, hash-chained, regulator-ready."
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Goderash", email = "eng@goderash.com" }]
 readme = "README.md"
-keywords = ["ai", "agents", "audit", "compliance", "governance", "soc2", "hipaa"]
+keywords = [
+  "ai",
+  "ai-agent",
+  "agents",
+  "audit",
+  "compliance",
+  "governance",
+  "soc2",
+  "hipaa",
+  "ffiec",
+  "finra",
+  "ledger",
+  "observability",
+  "llm",
+  "llmops",
+  "mlops",
+  "tool-calling",
+  "agent-framework",
+  "anthropic",
+  "openai",
+  "langchain",
+  "langgraph",
+]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
@@ -25,10 +47,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage    = "https://goderash.com"
-Repository  = "https://github.com/goderash/goderash"
-Issues      = "https://github.com/goderash/goderash/issues"
-Changelog   = "https://github.com/goderash/goderash/blob/main/CHANGELOG.md"
+Homepage      = "https://ai.goderash.com"
+Documentation = "https://github.com/goderash/goderash#readme"
+Repository    = "https://github.com/goderash/goderash"
+Issues        = "https://github.com/goderash/goderash/issues"
+Changelog     = "https://github.com/goderash/goderash/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [
